@@ -2255,7 +2255,6 @@ export class ComfyApp {
 		// ?data='' parse
 		const url = new URL(window.location.href);
 		const data = url.searchParams.get("data");
-		debugger;
 		fetch('/cdn/'+data)
 			.then(response => response.json())
 			.then(data => {
