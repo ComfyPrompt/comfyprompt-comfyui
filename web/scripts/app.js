@@ -1230,9 +1230,9 @@ export class ComfyApp {
 	 * Handles updates from the API socket
 	 */
 	#addApiUpdateHandlers() {
-		api.addEventListener("status", ({ detail }) => {
-			this.ui.setStatus(detail);
-		});
+		// api.addEventListener("status", ({ detail }) => {
+		// 	this.ui.setStatus(detail);
+		// });
 
 		api.addEventListener("reconnecting", () => {
 			this.ui.dialog.show("Reconnecting...");
@@ -1335,9 +1335,9 @@ export class ComfyApp {
 			for (const node of app.graph._nodes) {
 				node.onGraphConfigured?.();
 			}
-			
+
 			const r = onConfigure?.apply(this, arguments);
-			
+
 			// Fire after onConfigure, used by primitves to generate widget using input nodes config
 			for (const node of app.graph._nodes) {
 				node.onAfterGraphConfigured?.();
@@ -1353,7 +1353,7 @@ export class ComfyApp {
 	async #loadExtensions() {
 	    const extensions = await api.getExtensions();
 	    this.logging.addEntry("Comfy.App", "debug", { Extensions: extensions });
-	
+
 	    const extensionPromises = extensions.map(async ext => {
 	        try {
 	            await import(api.apiURL(ext));
@@ -1361,7 +1361,7 @@ export class ComfyApp {
 	            console.error("Error loading extension", ext, error);
 	        }
 	    });
-	
+
 	    await Promise.all(extensionPromises);
 	}
 
@@ -1399,7 +1399,7 @@ export class ComfyApp {
 		if (!user || !users[user]) {
 			// This will rarely be hit so move the loading to on demand
 			const { UserSelectionScreen } = await import("./ui/userSelection.js");
-		
+
 			this.ui.menuContainer.style.display = "none";
 			const { userId, username, created } = await new UserSelectionScreen().show(users, user);
 			this.ui.menuContainer.style.display = "";
@@ -1530,12 +1530,14 @@ export class ComfyApp {
 
 		this.#addDrawNodeHandler();
 		this.#addDrawGroupsHandler();
-		this.#addDropHandler();
-		this.#addCopyHandler();
-		this.#addPasteHandler();
-		this.#addKeyboardHandler();
+		// this.#addDropHandler();
+		// this.#addCopyHandler();
+		// this.#addPasteHandler();
+		// this.#addKeyboardHandler();
 
 		await this.#invokeExtensionsAsync("setup");
+		app.graph.clear();
+		app.getData();
 	}
 
 	/**
@@ -1626,7 +1628,7 @@ export class ComfyApp {
 
 		this.#addNodeContextMenuHandler(node);
 		this.#addDrawBackgroundHandler(node, app);
-		this.#addNodeKeyHandler(node);
+		// this.#addNodeKeyHandler(node);
 
 		await this.#invokeExtensionsAsync("beforeRegisterNodeDef", node, nodeData);
 		LiteGraph.registerNodeType(nodeId, node);
@@ -2248,6 +2250,26 @@ export class ComfyApp {
 		this.lastExecutionError = null;
 		this.runningNodeId = null;
 	}
+
+	getData() {
+		// ?data='' parse
+		const url = new URL(window.location.href);
+		const data = url.searchParams.get("data");
+		debugger;
+		fetch('/cdn/'+data)
+			.then(response => response.json())
+			.then(data => {
+				const jsonContent = data;
+				if (jsonContent?.templates) {
+					this.loadTemplateData(jsonContent);
+				} else if(this.isApiJson(jsonContent)) {
+					this.loadApiJson(jsonContent);
+				} else {
+					this.loadGraphData(jsonContent);
+				}
+			})
+	}
 }
 
 export const app = new ComfyApp();
+

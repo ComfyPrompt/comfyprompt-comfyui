@@ -117,7 +117,7 @@ class PromptServer():
                 self.sockets.pop(sid, None)
             return ws
 
-        @routes.get("/")
+        @routes.get("/workflow")
         async def get_root(request):
             return web.FileResponse(os.path.join(self.web_root, "index.html"))
 
