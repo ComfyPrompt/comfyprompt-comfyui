@@ -73,7 +73,7 @@ if __name__ == "__main__":
 import comfy.utils
 import yaml
 
-import execution
+# import execution
 import server
 from server import BinaryEventTypes
 from nodes import init_custom_nodes
@@ -91,59 +91,60 @@ def cuda_malloc_warning():
             logging.warning("\nWARNING: this card most likely does not support cuda-malloc, if you get \"CUDA error\" please run ComfyUI with: --disable-cuda-malloc\n")
 
 def prompt_worker(q, server):
-    e = execution.PromptExecutor(server)
-    last_gc_collect = 0
-    need_gc = False
-    gc_collect_interval = 10.0
-
-    while True:
-        timeout = 1000.0
-        if need_gc:
-            timeout = max(gc_collect_interval - (current_time - last_gc_collect), 0.0)
-
-        queue_item = q.get(timeout=timeout)
-        if queue_item is not None:
-            item, item_id = queue_item
-            execution_start_time = time.perf_counter()
-            prompt_id = item[1]
-            server.last_prompt_id = prompt_id
-
-            e.execute(item[2], prompt_id, item[3], item[4])
-            need_gc = True
-            q.task_done(item_id,
-                        e.outputs_ui,
-                        status=execution.PromptQueue.ExecutionStatus(
-                            status_str='success' if e.success else 'error',
-                            completed=e.success,
-                            messages=e.status_messages))
-            if server.client_id is not None:
-                server.send_sync("executing", { "node": None, "prompt_id": prompt_id }, server.client_id)
-
-            current_time = time.perf_counter()
-            execution_time = current_time - execution_start_time
-            logging.info("Prompt executed in {:.2f} seconds".format(execution_time))
-
-        flags = q.get_flags()
-        free_memory = flags.get("free_memory", False)
-
-        if flags.get("unload_models", free_memory):
-            comfy.model_management.unload_all_models()
-            need_gc = True
-            last_gc_collect = 0
-
-        if free_memory:
-            e.reset()
-            need_gc = True
-            last_gc_collect = 0
-
-        if need_gc:
-            current_time = time.perf_counter()
-            if (current_time - last_gc_collect) > gc_collect_interval:
-                comfy.model_management.cleanup_models()
-                gc.collect()
-                comfy.model_management.soft_empty_cache()
-                last_gc_collect = current_time
-                need_gc = False
+    print("Prompt worker started")
+    # e = execution.PromptExecutor(server)
+    # last_gc_collect = 0
+    # need_gc = False
+    # gc_collect_interval = 10.0
+    #
+    # while True:
+    #     timeout = 1000.0
+    #     if need_gc:
+    #         timeout = max(gc_collect_interval - (current_time - last_gc_collect), 0.0)
+    #
+    #     queue_item = q.get(timeout=timeout)
+    #     if queue_item is not None:
+    #         item, item_id = queue_item
+    #         execution_start_time = time.perf_counter()
+    #         prompt_id = item[1]
+    #         server.last_prompt_id = prompt_id
+    #
+    #         e.execute(item[2], prompt_id, item[3], item[4])
+    #         need_gc = True
+    #         q.task_done(item_id,
+    #                     e.outputs_ui,
+    #                     status=execution.PromptQueue.ExecutionStatus(
+    #                         status_str='success' if e.success else 'error',
+    #                         completed=e.success,
+    #                         messages=e.status_messages))
+    #         if server.client_id is not None:
+    #             server.send_sync("executing", { "node": None, "prompt_id": prompt_id }, server.client_id)
+    #
+    #         current_time = time.perf_counter()
+    #         execution_time = current_time - execution_start_time
+    #         logging.info("Prompt executed in {:.2f} seconds".format(execution_time))
+    #
+    #     flags = q.get_flags()
+    #     free_memory = flags.get("free_memory", False)
+    #
+    #     if flags.get("unload_models", free_memory):
+    #         comfy.model_management.unload_all_models()
+    #         need_gc = True
+    #         last_gc_collect = 0
+    #
+    #     if free_memory:
+    #         e.reset()
+    #         need_gc = True
+    #         last_gc_collect = 0
+    #
+    #     if need_gc:
+    #         current_time = time.perf_counter()
+    #         if (current_time - last_gc_collect) > gc_collect_interval:
+    #             comfy.model_management.cleanup_models()
+    #             gc.collect()
+    #             comfy.model_management.soft_empty_cache()
+    #             last_gc_collect = current_time
+    #             need_gc = False
 
 async def run(server, address='', port=8188, verbose=True, call_on_start=None):
     await asyncio.gather(server.start(address, port, verbose, call_on_start), server.publish_loop())
@@ -204,8 +205,8 @@ if __name__ == "__main__":
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     server = server.PromptServer(loop)
-    q = execution.PromptQueue(server)
-
+    # q = execution.PromptQueue(server)
+    q = None
     extra_model_paths_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "extra_model_paths.yaml")
     if os.path.isfile(extra_model_paths_config_path):
         load_extra_path_config(extra_model_paths_config_path)
