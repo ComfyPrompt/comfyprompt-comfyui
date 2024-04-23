@@ -77,15 +77,7 @@ def get_torch_device():
     if directml_enabled:
         global directml_device
         return directml_device
-    if cpu_state == CPUState.MPS:
-        return torch.device("mps")
-    if cpu_state == CPUState.CPU:
-        return torch.device("cpu")
-    else:
-        if is_intel_xpu():
-            return torch.device("xpu")
-        else:
-            return torch.device(torch.cuda.current_device())
+    return torch.device("cpu")
 
 def get_total_memory(dev=None, torch_total_too=False):
     global directml_enabled
@@ -116,7 +108,7 @@ def get_total_memory(dev=None, torch_total_too=False):
     else:
         return mem_total
 
-total_vram = get_total_memory(get_torch_device()) / (1024 * 1024)
+# total_vram = get_total_memory(get_torch_device()) / (1024 * 1024)
 total_ram = psutil.virtual_memory().total / (1024 * 1024)
 logging.info("Total VRAM {:0.0f} MB, total RAM {:0.0f} MB".format(total_vram, total_ram))
 if not args.normalvram and not args.cpu:
