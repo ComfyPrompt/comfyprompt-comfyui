@@ -5,7 +5,7 @@ import traceback
 
 import nodes
 import folder_paths
-# import execution
+import execution
 import uuid
 import urllib
 import json
@@ -465,8 +465,7 @@ class PromptServer():
 
             if "prompt" in json_data:
                 prompt = json_data["prompt"]
-                # valid = execution.validate_prompt(prompt)
-                valid = (True, "", [], [])
+                valid = execution.validate_prompt(prompt)
                 extra_data = {}
                 if "extra_data" in json_data:
                     extra_data = json_data["extra_data"]
