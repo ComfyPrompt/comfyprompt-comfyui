@@ -543,8 +543,8 @@ class PromptServer():
     def get_queue_info(self):
         prompt_info = {}
         exec_info = {}
-        exec_info['queue_remaining'] = self.prompt_queue.get_tasks_remaining()
-        prompt_info['exec_info'] = exec_info
+        # exec_info['queue_remaining'] = self.prompt_queue.get_tasks_remaining()
+        # prompt_info['exec_info'] = exec_info
         return prompt_info
 
     async def send(self, event, data, sid=None):
