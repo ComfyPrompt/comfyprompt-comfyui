@@ -2256,7 +2256,7 @@ export class ComfyApp {
 		const url = new URL(window.location.href);
 		const data = url.searchParams.get("data");
 		// comfy-spinner id show
-		document.querySelector('#comfy-spinner').setAttribute('style', 'display: block');
+		document.getElementById('comfy-spinner').setAttribute('style', 'display: block');
 		try {
 			fetch('/cdn/'+data)
 				.then(response => response.json())
@@ -2270,10 +2270,10 @@ export class ComfyApp {
 						this.loadGraphData(jsonContent);
 					}
 					// comfy-spinner id hide
-					document.querySelector('#comfy-spinner').setAttribute('style', 'display: none');
+					document.getElementById('#comfy-spinner').setAttribute('style', 'display: none');
 				})
 		} catch (e) {
-					document.querySelector('#comfy-spinner').setAttribute('style', 'display: none');
+					document.getElementById('#comfy-spinner').setAttribute('style', 'display: none');
 		}
 		try {
 			document.querySelector('.pysssss-image-feed').setAttribute('style', 'display: none');
