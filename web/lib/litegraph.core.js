@@ -5011,7 +5011,7 @@ LGraphNode.prototype.executeAction = function(action)
     //Scale and Offset
     function DragAndScale(element, skip_events) {
         this.offset = new Float32Array([0, 0]);
-        this.scale = 0.7;
+        this.scale = 0.3;
         this.max_scale = 10;
         this.min_scale = 0.1;
         this.onredraw = null;
