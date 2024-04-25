@@ -2267,6 +2267,12 @@ export class ComfyApp {
 					this.loadGraphData(jsonContent);
 				}
 			})
+	// 	find pysssss-image-feed class after hidden code write
+		try {
+			document.querySelector('.pysssss-image-feed').setAttribute('style', 'display: none');
+		} catch (error) {
+			console.log('error')
+		}
 	}
 }
 

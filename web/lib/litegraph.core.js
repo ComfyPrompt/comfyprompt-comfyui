@@ -740,6 +740,7 @@
 		}
     });
 
+
     //timer that works everywhere
     if (typeof performance != "undefined") {
         LiteGraph.getTime = performance.now.bind(performance);
@@ -5010,7 +5011,7 @@ LGraphNode.prototype.executeAction = function(action)
     //Scale and Offset
     function DragAndScale(element, skip_events) {
         this.offset = new Float32Array([0, 0]);
-        this.scale = 1;
+        this.scale = 0.7;
         this.max_scale = 10;
         this.min_scale = 0.1;
         this.onredraw = null;
@@ -6919,7 +6920,7 @@ LGraphNode.prototype.executeAction = function(action)
             scale *= 1 / 1.1;
         }
 
-        //this.setZoom( scale, [ e.clientX, e.clientY ] );
+        this.setZoom( scale, [ e.clientX, e.clientY ] );
         this.ds.changeScale(scale, [e.clientX, e.clientY]);
 
         this.graph.change();
@@ -11207,7 +11208,7 @@ LGraphNode.prototype.executeAction = function(action)
         
         var dialog = document.createElement("div");
         dialog.is_modified = false;
-        dialog.className = "graphdialog";
+        dialog.className = "";
         dialog.innerHTML =
             "<span class='name'></span><input autofocus type='text' class='value'/><button>OK</button>";
         dialog.close = function() {
@@ -11300,7 +11301,7 @@ LGraphNode.prototype.executeAction = function(action)
 
         var dialog = document.createElement("div");
         dialog.is_modified = false;
-        dialog.className = "graphdialog rounded";
+        dialog.className = " rounded";
         if(multiline)
 	        dialog.innerHTML = "<span class='name'></span> <textarea autofocus class='value'></textarea><button class='rounded'>OK</button>";
 		else
@@ -11440,7 +11441,7 @@ LGraphNode.prototype.executeAction = function(action)
         var root_document = canvas.ownerDocument || document;
 
         var dialog = document.createElement("div");
-        dialog.className = "litegraph litesearchbox graphdialog rounded";
+        dialog.className = "rounded";
         dialog.innerHTML = "<span class='name'>Search</span> <input autofocus type='text' class='value rounded'/>";
         if (options.do_type_filter){
             dialog.innerHTML += "<select class='slot_in_type_filter'><option value=''></option></select>";
@@ -12130,7 +12131,7 @@ LGraphNode.prototype.executeAction = function(action)
         options = Object.assign(def_options, options || {});
 
         var dialog = document.createElement("div");
-        dialog.className = "graphdialog";
+        dialog.className = "";
         dialog.innerHTML = html;
         dialog.is_modified = false;
 
@@ -12222,205 +12223,205 @@ LGraphNode.prototype.executeAction = function(action)
         return dialog;
     };
 
-	LGraphCanvas.prototype.createPanel = function(title, options) {
-		options = options || {};
-
-		var ref_window = options.window || window;
-		var root = document.createElement("div");
-		root.className = "litegraph dialog";
-		root.innerHTML = "<div class='dialog-header'><span class='dialog-title'></span></div><div class='dialog-content'></div><div style='display:none;' class='dialog-alt-content'></div><div class='dialog-footer'></div>";
-		root.header = root.querySelector(".dialog-header");
-
-		if(options.width)
-			root.style.width = options.width + (options.width.constructor === Number ? "px" : "");
-		if(options.height)
-			root.style.height = options.height + (options.height.constructor === Number ? "px" : "");
-		if(options.closable)
-		{
-			var close = document.createElement("span");
-			close.innerHTML = "&#10005;";
-			close.classList.add("close");
-			close.addEventListener("click",function(){
-				root.close();
-			});
-			root.header.appendChild(close);
-		}
-		root.title_element = root.querySelector(".dialog-title");
-		root.title_element.innerText = title;
-		root.content = root.querySelector(".dialog-content");
-        root.alt_content = root.querySelector(".dialog-alt-content");
-		root.footer = root.querySelector(".dialog-footer");
-
-		root.close = function()
-		{
-		    if (root.onClose && typeof root.onClose == "function"){
-		        root.onClose();
-		    }
-            if(root.parentNode)
-		        root.parentNode.removeChild(root);
-		    /* XXX CHECK THIS */
-		    if(this.parentNode){
-		    	this.parentNode.removeChild(this);
-		    }
-		    /* XXX this was not working, was fixed with an IF, check this */
-		}
-
-        // function to swap panel content
-        root.toggleAltContent = function(force){
-            if (typeof force != "undefined"){
-                var vTo = force ? "block" : "none";
-                var vAlt = force ? "none" : "block";
-            }else{
-                var vTo = root.alt_content.style.display != "block" ? "block" : "none";
-                var vAlt = root.alt_content.style.display != "block" ? "none" : "block";
-            }
-            root.alt_content.style.display = vTo;
-            root.content.style.display = vAlt;
-        }
-        
-        root.toggleFooterVisibility = function(force){
-            if (typeof force != "undefined"){
-                var vTo = force ? "block" : "none";
-            }else{
-                var vTo = root.footer.style.display != "block" ? "block" : "none";
-            }
-            root.footer.style.display = vTo;
-        }
-        
-		root.clear = function()
-		{
-			this.content.innerHTML = "";
-		}
-
-		root.addHTML = function(code, classname, on_footer)
-		{
-			var elem = document.createElement("div");
-			if(classname)
-				elem.className = classname;
-			elem.innerHTML = code;
-			if(on_footer)
-				root.footer.appendChild(elem);
-			else
-				root.content.appendChild(elem);
-			return elem;
-		}
-
-		root.addButton = function( name, callback, options )
-		{
-			var elem = document.createElement("button");
-			elem.innerText = name;
-			elem.options = options;
-			elem.classList.add("btn");
-			elem.addEventListener("click",callback);
-			root.footer.appendChild(elem);
-			return elem;
-		}
-
-		root.addSeparator = function()
-		{
-			var elem = document.createElement("div");
-			elem.className = "separator";
-			root.content.appendChild(elem);
-		}
-
-		root.addWidget = function( type, name, value, options, callback )
-		{
-			options = options || {};
-			var str_value = String(value);
-			type = type.toLowerCase();
-			if(type == "number")
-				str_value = value.toFixed(3);
-
-			var elem = document.createElement("div");
-			elem.className = "property";
-			elem.innerHTML = "<span class='property_name'></span><span class='property_value'></span>";
-			elem.querySelector(".property_name").innerText = options.label || name;
-			var value_element = elem.querySelector(".property_value");
-			value_element.innerText = str_value;
-			elem.dataset["property"] = name;
-			elem.dataset["type"] = options.type || type;
-			elem.options = options;
-			elem.value = value;
-
-			if( type == "code" )
-				elem.addEventListener("click", function(e){ root.inner_showCodePad( this.dataset["property"] ); });
-			else if (type == "boolean")
-			{
-				elem.classList.add("boolean");
-				if(value)
-					elem.classList.add("bool-on");
-				elem.addEventListener("click", function(){ 
-					//var v = node.properties[this.dataset["property"]]; 
-					//node.setProperty(this.dataset["property"],!v); this.innerText = v ? "true" : "false"; 
-					var propname = this.dataset["property"];
-					this.value = !this.value;
-					this.classList.toggle("bool-on");
-					this.querySelector(".property_value").innerText = this.value ? "true" : "false";
-					innerChange(propname, this.value );
-				});
-			}
-			else if (type == "string" || type == "number")
-			{
-				value_element.setAttribute("contenteditable",true);
-				value_element.addEventListener("keydown", function(e){ 
-					if(e.code == "Enter" && (type != "string" || !e.shiftKey)) // allow for multiline
-					{
-						e.preventDefault();
-						this.blur();
-					}
-				});
-				value_element.addEventListener("blur", function(){ 
-					var v = this.innerText;
-					var propname = this.parentNode.dataset["property"];
-					var proptype = this.parentNode.dataset["type"];
-					if( proptype == "number")
-						v = Number(v);
-					innerChange(propname, v);
-				});
-			}
-			else if (type == "enum" || type == "combo") {
-				var str_value = LGraphCanvas.getPropertyPrintableValue( value, options.values );
-				value_element.innerText = str_value;
-
-				value_element.addEventListener("click", function(event){ 
-					var values = options.values || [];
-					var propname = this.parentNode.dataset["property"];
-					var elem_that = this;
-					var menu = new LiteGraph.ContextMenu(values,{
-							event: event,
-							className: "dark",
-							callback: inner_clicked
-						},
-						ref_window);
-					function inner_clicked(v, option, event) {
-						//node.setProperty(propname,v); 
-						//graphcanvas.dirty_canvas = true;
-						elem_that.innerText = v;
-						innerChange(propname,v);
-						return false;
-					}
-				});
-            }
-
-			root.content.appendChild(elem);
-
-			function innerChange(name, value)
-			{
-				//console.log("change",name,value);
-				//that.dirty_canvas = true;
-				if(options.callback)
-					options.callback(name,value,options);
-				if(callback)
-					callback(name,value,options);
-			}
-
-			return elem;
-		}
-
-        if (root.onOpen && typeof root.onOpen == "function") root.onOpen();
-        
-		return root;
-	};
+	// LGraphCanvas.prototype.createPanel = function(title, options) {
+	// 	options = options || {};
+    //
+	// 	var ref_window = options.window || window;
+	// 	// var root = document.createElement("div");
+	// 	// root.className = "litegraph dialog";
+	// 	// root.innerHTML = "<div class='dialog-header'><span class='dialog-title'></span></div><div class='dialog-content'></div><div style='display:none;' class='dialog-alt-content'></div><div class='dialog-footer'></div>";
+	// 	// root.header = root.querySelector(".dialog-header");
+    //     //
+	// 	// if(options.width)
+	// 	// 	root.style.width = options.width + (options.width.constructor === Number ? "px" : "");
+	// 	// if(options.height)
+	// 	// 	root.style.height = options.height + (options.height.constructor === Number ? "px" : "");
+	// 	if(options.closable)
+	// 	{
+	// 		var close = document.createElement("span");
+	// 		close.innerHTML = "&#10005;";
+	// 		close.classList.add("close");
+	// 		close.addEventListener("click",function(){
+	// 			root.close();
+	// 		});
+	// 		root.header.appendChild(close);
+	// 	}
+	// 	root.title_element = root.querySelector(".dialog-title");
+	// 	root.title_element.innerText = title;
+	// 	root.content = root.querySelector(".dialog-content");
+    //     root.alt_content = root.querySelector(".dialog-alt-content");
+	// 	root.footer = root.querySelector(".dialog-footer");
+    //
+	// 	root.close = function()
+	// 	{
+	// 	    if (root.onClose && typeof root.onClose == "function"){
+	// 	        root.onClose();
+	// 	    }
+    //         if(root.parentNode)
+	// 	        root.parentNode.removeChild(root);
+	// 	    /* XXX CHECK THIS */
+	// 	    if(this.parentNode){
+	// 	    	this.parentNode.removeChild(this);
+	// 	    }
+	// 	    /* XXX this was not working, was fixed with an IF, check this */
+	// 	}
+    //
+    //     // function to swap panel content
+    //     root.toggleAltContent = function(force){
+    //         if (typeof force != "undefined"){
+    //             var vTo = force ? "block" : "none";
+    //             var vAlt = force ? "none" : "block";
+    //         }else{
+    //             var vTo = root.alt_content.style.display != "block" ? "block" : "none";
+    //             var vAlt = root.alt_content.style.display != "block" ? "none" : "block";
+    //         }
+    //         root.alt_content.style.display = vTo;
+    //         root.content.style.display = vAlt;
+    //     }
+    //
+    //     root.toggleFooterVisibility = function(force){
+    //         if (typeof force != "undefined"){
+    //             var vTo = force ? "block" : "none";
+    //         }else{
+    //             var vTo = root.footer.style.display != "block" ? "block" : "none";
+    //         }
+    //         root.footer.style.display = vTo;
+    //     }
+    //
+	// 	root.clear = function()
+	// 	{
+	// 		this.content.innerHTML = "";
+	// 	}
+    //
+	// 	root.addHTML = function(code, classname, on_footer)
+	// 	{
+	// 		var elem = document.createElement("div");
+	// 		if(classname)
+	// 			elem.className = classname;
+	// 		elem.innerHTML = code;
+	// 		if(on_footer)
+	// 			root.footer.appendChild(elem);
+	// 		else
+	// 			root.content.appendChild(elem);
+	// 		return elem;
+	// 	}
+    //
+	// 	root.addButton = function( name, callback, options )
+	// 	{
+	// 		var elem = document.createElement("button");
+	// 		elem.innerText = name;
+	// 		elem.options = options;
+	// 		elem.classList.add("btn");
+	// 		elem.addEventListener("click",callback);
+	// 		root.footer.appendChild(elem);
+	// 		return elem;
+	// 	}
+    //
+	// 	root.addSeparator = function()
+	// 	{
+	// 		var elem = document.createElement("div");
+	// 		elem.className = "separator";
+	// 		root.content.appendChild(elem);
+	// 	}
+    //
+	// 	root.addWidget = function( type, name, value, options, callback )
+	// 	{
+	// 		options = options || {};
+	// 		var str_value = String(value);
+	// 		type = type.toLowerCase();
+	// 		if(type == "number")
+	// 			str_value = value.toFixed(3);
+    //
+	// 		var elem = document.createElement("div");
+	// 		elem.className = "property";
+	// 		elem.innerHTML = "<span class='property_name'></span><span class='property_value'></span>";
+	// 		elem.querySelector(".property_name").innerText = options.label || name;
+	// 		var value_element = elem.querySelector(".property_value");
+	// 		value_element.innerText = str_value;
+	// 		elem.dataset["property"] = name;
+	// 		elem.dataset["type"] = options.type || type;
+	// 		elem.options = options;
+	// 		elem.value = value;
+    //
+	// 		if( type == "code" )
+	// 			elem.addEventListener("click", function(e){ root.inner_showCodePad( this.dataset["property"] ); });
+	// 		else if (type == "boolean")
+	// 		{
+	// 			elem.classList.add("boolean");
+	// 			if(value)
+	// 				elem.classList.add("bool-on");
+	// 			elem.addEventListener("click", function(){
+	// 				//var v = node.properties[this.dataset["property"]];
+	// 				//node.setProperty(this.dataset["property"],!v); this.innerText = v ? "true" : "false";
+	// 				var propname = this.dataset["property"];
+	// 				this.value = !this.value;
+	// 				this.classList.toggle("bool-on");
+	// 				this.querySelector(".property_value").innerText = this.value ? "true" : "false";
+	// 				innerChange(propname, this.value );
+	// 			});
+	// 		}
+	// 		else if (type == "string" || type == "number")
+	// 		{
+	// 			value_element.setAttribute("contenteditable",true);
+	// 			value_element.addEventListener("keydown", function(e){
+	// 				if(e.code == "Enter" && (type != "string" || !e.shiftKey)) // allow for multiline
+	// 				{
+	// 					e.preventDefault();
+	// 					this.blur();
+	// 				}
+	// 			});
+	// 			value_element.addEventListener("blur", function(){
+	// 				var v = this.innerText;
+	// 				var propname = this.parentNode.dataset["property"];
+	// 				var proptype = this.parentNode.dataset["type"];
+	// 				if( proptype == "number")
+	// 					v = Number(v);
+	// 				innerChange(propname, v);
+	// 			});
+	// 		}
+	// 		else if (type == "enum" || type == "combo") {
+	// 			var str_value = LGraphCanvas.getPropertyPrintableValue( value, options.values );
+	// 			value_element.innerText = str_value;
+    //
+	// 			value_element.addEventListener("click", function(event){
+	// 				var values = options.values || [];
+	// 				var propname = this.parentNode.dataset["property"];
+	// 				var elem_that = this;
+	// 				var menu = new LiteGraph.ContextMenu(values,{
+	// 						event: event,
+	// 						className: "dark",
+	// 						callback: inner_clicked
+	// 					},
+	// 					ref_window);
+	// 				function inner_clicked(v, option, event) {
+	// 					//node.setProperty(propname,v);
+	// 					//graphcanvas.dirty_canvas = true;
+	// 					elem_that.innerText = v;
+	// 					innerChange(propname,v);
+	// 					return false;
+	// 				}
+	// 			});
+    //         }
+    //
+	// 		root.content.appendChild(elem);
+    //
+	// 		function innerChange(name, value)
+	// 		{
+	// 			//console.log("change",name,value);
+	// 			//that.dirty_canvas = true;
+	// 			if(options.callback)
+	// 				options.callback(name,value,options);
+	// 			if(callback)
+	// 				callback(name,value,options);
+	// 		}
+    //
+	// 		return elem;
+	// 	}
+    //
+    //     if (root.onOpen && typeof root.onOpen == "function") root.onOpen();
+    //
+	// 	return root;
+	// };
 
 	LGraphCanvas.getPropertyPrintableValue = function(value, values)
 	{
@@ -12810,20 +12811,20 @@ LGraphNode.prototype.executeAction = function(action)
         this.canvas.parentNode.appendChild(panel);
         return panel;
     }
-	LGraphCanvas.prototype.checkPanels = function()
-	{
-		if(!this.canvas)
-			return;
-		var panels = this.canvas.parentNode.querySelectorAll(".litegraph.dialog");
-		for(var i = 0; i < panels.length; ++i)
-		{
-			var panel = panels[i];
-			if( !panel.node )
-				continue;
-			if( !panel.node.graph || panel.graph != this.graph )
-				panel.close();
-		}
-	}
+	// LGraphCanvas.prototype.checkPanels = function()
+	// {
+	// 	if(!this.canvas)
+	// 		return;
+	// 	var panels = this.canvas.parentNode.querySelectorAll(".litegraph.dialog");
+	// 	for(var i = 0; i < panels.length; ++i)
+	// 	{
+	// 		var panel = panels[i];
+	// 		if( !panel.node )
+	// 			continue;
+	// 		if( !panel.node.graph || panel.graph != this.graph )
+	// 			panel.close();
+	// 	}
+	// }
 
     LGraphCanvas.onMenuNodeCollapse = function(value, options, e, menu, node) {
 		node.graph.beforeChange(/*?*/);
@@ -13691,7 +13692,7 @@ LGraphNode.prototype.executeAction = function(action)
         }
 
         var root = document.createElement("div");
-        root.className = "litegraph litecontextmenu litemenubar-panel";
+        root.className = "litegraph";
         if (options.className) {
             root.className += " " + options.className;
         }
@@ -13711,18 +13712,18 @@ LGraphNode.prototype.executeAction = function(action)
             },
             true
         );
-        root.addEventListener(
-            "contextmenu",
-            function(e) {
-                if (e.button != 2) {
-                    //right button
-                    return false;
-                }
-                e.preventDefault();
-                return false;
-            },
-            true
-        );
+        // root.addEventListener(
+        //     "contextmenu",
+        //     function(e) {
+        //         if (e.button != 2) {
+        //             //right button
+        //             return false;
+        //         }
+        //         e.preventDefault();
+        //         return false;
+        //     },
+        //     true
+        // );
 
         LiteGraph.pointerListenerAdd(root,"down",
             function(e) {
@@ -13844,214 +13845,11 @@ LGraphNode.prototype.executeAction = function(action)
         }
     }
 
-    ContextMenu.prototype.addItem = function(name, value, options) {
-        var that = this;
-        options = options || {};
-
-        var element = document.createElement("div");
-        element.className = "litemenu-entry submenu";
-
-        var disabled = false;
-
-        if (value === null) {
-            element.classList.add("separator");
-            //element.innerHTML = "<hr/>"
-            //continue;
-        } else {
-            element.innerHTML = value && value.title ? value.title : name;
-            element.value = value;
-
-            if (value) {
-                if (value.disabled) {
-                    disabled = true;
-                    element.classList.add("disabled");
-                }
-                if (value.submenu || value.has_submenu) {
-                    element.classList.add("has_submenu");
-                }
-            }
-
-            if (typeof value == "function") {
-                element.dataset["value"] = name;
-                element.onclick_callback = value;
-            } else {
-                element.dataset["value"] = value;
-            }
-
-            if (value.className) {
-                element.className += " " + value.className;
-            }
-        }
-
-        this.root.appendChild(element);
-        if (!disabled) {
-            element.addEventListener("click", inner_onclick);
-        }
-        if (!disabled && options.autoopen) {
-			LiteGraph.pointerListenerAdd(element,"enter",inner_over);
-        }
-
-        function inner_over(e) {
-            var value = this.value;
-            if (!value || !value.has_submenu) {
-                return;
-            }
-            //if it is a submenu, autoopen like the item was clicked
-            inner_onclick.call(this, e);
-        }
-
-        //menu option clicked
-        function inner_onclick(e) {
-            var value = this.value;
-            var close_parent = true;
-
-            if (that.current_submenu) {
-                that.current_submenu.close(e);
-            }
-
-            //global callback
-            if (options.callback) {
-                var r = options.callback.call(
-                    this,
-                    value,
-                    options,
-                    e,
-                    that,
-                    options.node
-                );
-                if (r === true) {
-                    close_parent = false;
-                }
-            }
-
-            //special cases
-            if (value) {
-                if (
-                    value.callback &&
-                    !options.ignore_item_callbacks &&
-                    value.disabled !== true
-                ) {
-                    //item callback
-                    var r = value.callback.call(
-                        this,
-                        value,
-                        options,
-                        e,
-                        that,
-                        options.extra
-                    );
-                    if (r === true) {
-                        close_parent = false;
-                    }
-                }
-                if (value.submenu) {
-                    if (!value.submenu.options) {
-                        throw "ContextMenu submenu needs options";
-                    }
-                    var submenu = new that.constructor(value.submenu.options, {
-                        callback: value.submenu.callback,
-                        event: e,
-                        parentMenu: that,
-                        ignore_item_callbacks:
-                            value.submenu.ignore_item_callbacks,
-                        title: value.submenu.title,
-                        extra: value.submenu.extra,
-                        autoopen: options.autoopen
-                    });
-                    close_parent = false;
-                }
-            }
-
-            if (close_parent && !that.lock) {
-                that.close();
-            }
-        }
-
-        return element;
-    };
-
-    ContextMenu.prototype.close = function(e, ignore_parent_menu) {
-        if (this.root.parentNode) {
-            this.root.parentNode.removeChild(this.root);
-        }
-        if (this.parentMenu && !ignore_parent_menu) {
-            this.parentMenu.lock = false;
-            this.parentMenu.current_submenu = null;
-            if (e === undefined) {
-                this.parentMenu.close();
-            } else if (
-                e &&
-                !ContextMenu.isCursorOverElement(e, this.parentMenu.root)
-            ) {
-                ContextMenu.trigger(this.parentMenu.root, LiteGraph.pointerevents_method+"leave", e);
-            }
-        }
-        if (this.current_submenu) {
-            this.current_submenu.close(e, true);
-        }
-
-        if (this.root.closing_timer) {
-            clearTimeout(this.root.closing_timer);
-        }
-        
-        // TODO implement : LiteGraph.contextMenuClosed(); :: keep track of opened / closed / current ContextMenu
-        // on key press, allow filtering/selecting the context menu elements
-    };
-
-    //this code is used to trigger events easily (used in the context menu mouseleave
-    ContextMenu.trigger = function(element, event_name, params, origin) {
-        var evt = document.createEvent("CustomEvent");
-        evt.initCustomEvent(event_name, true, true, params); //canBubble, cancelable, detail
-        evt.srcElement = origin;
-        if (element.dispatchEvent) {
-            element.dispatchEvent(evt);
-        } else if (element.__events) {
-            element.__events.dispatchEvent(evt);
-        }
-        //else nothing seems binded here so nothing to do
-        return evt;
-    };
-
-    //returns the top most menu
-    ContextMenu.prototype.getTopMenu = function() {
-        if (this.options.parentMenu) {
-            return this.options.parentMenu.getTopMenu();
-        }
-        return this;
-    };
-
-    ContextMenu.prototype.getFirstEvent = function() {
-        if (this.options.parentMenu) {
-            return this.options.parentMenu.getFirstEvent();
-        }
-        return this.options.event;
-    };
-
-    ContextMenu.isCursorOverElement = function(event, element) {
-        var left = event.clientX;
-        var top = event.clientY;
-        var rect = element.getBoundingClientRect();
-        if (!rect) {
-            return false;
-        }
-        if (
-            top > rect.top &&
-            top < rect.top + rect.height &&
-            left > rect.left &&
-            left < rect.left + rect.width
-        ) {
-            return true;
-        }
-        return false;
-    };
-
-    LiteGraph.ContextMenu = ContextMenu;
-
     LiteGraph.closeAllContextMenus = function(ref_window) {
         ref_window = ref_window || window;
 
-        var elements = ref_window.document.querySelectorAll(".litecontextmenu");
-        if (!elements.length) {
+        // var elements = ref_window.document.querySelectorAll(".litecontextmenu");
+        if (true) {
             return;
         }
 

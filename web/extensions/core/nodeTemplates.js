@@ -300,19 +300,6 @@ class ManageTemplates extends ComfyDialog {
 												color: "red",
 												fontWeight: "normal",
 											},
-											onclick: (e) => {
-												const item = e.target.parentNode.parentNode;
-												item.parentNode.removeChild(item);
-												this.templates.splice(item.dataset.id*1, 1);
-												this.store();
-												// update the rows index, setTimeout ensures that the list is updated
-												var that = this;
-												setTimeout(function (){
-													that.element.querySelectorAll('.tempateManagerRow').forEach((el,i) => {
-														el.dataset.id = i;
-													});
-												}, 0);
-											},
 										}),
 									]
 								),
