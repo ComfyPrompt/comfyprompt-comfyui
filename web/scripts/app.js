@@ -2256,7 +2256,7 @@ export class ComfyApp {
 		const url = new URL(window.location.href);
 		const data = url.searchParams.get("data");
 		// comfy-spinner id show
-		document.querySelector('#comfy-spinner').style.display = 'block';
+		document.querySelector('#comfy-spinner').setAttribute('style', 'display: block');
 		try {
 			fetch('/cdn/'+data)
 				.then(response => response.json())
@@ -2270,11 +2270,11 @@ export class ComfyApp {
 						this.loadGraphData(jsonContent);
 					}
 					// comfy-spinner id hide
-					document.querySelector('#comfy-spinner').style.display = 'none';
+					document.querySelector('#comfy-spinner').setAttribute('style', 'display: none');
 				})
 		} catch (e) {
 			// comfy-spinner id hide
-			document.querySelector('#comfy-spinner').style.display = 'none';
+					document.querySelector('#comfy-spinner').setAttribute('style', 'display: none');
 		}
 	// 	find pysssss-image-feed class after hidden code write
 		try {
