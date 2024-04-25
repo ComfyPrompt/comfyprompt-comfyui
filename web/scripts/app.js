@@ -2273,10 +2273,8 @@ export class ComfyApp {
 					document.querySelector('#comfy-spinner').setAttribute('style', 'display: none');
 				})
 		} catch (e) {
-			// comfy-spinner id hide
 					document.querySelector('#comfy-spinner').setAttribute('style', 'display: none');
 		}
-	// 	find pysssss-image-feed class after hidden code write
 		try {
 			document.querySelector('.pysssss-image-feed').setAttribute('style', 'display: none');
 		} catch (error) {
