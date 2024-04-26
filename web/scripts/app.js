@@ -2270,10 +2270,10 @@ export class ComfyApp {
 						this.loadGraphData(jsonContent);
 					}
 					// comfy-spinner id hide
-					document.getElementById('#comfy-spinner').setAttribute('style', 'display: none');
+					document.getElementById('comfy-spinner').setAttribute('style', 'display: none');
 				})
 		} catch (e) {
-					document.getElementById('#comfy-spinner').setAttribute('style', 'display: none');
+					document.getElementById('comfy-spinner').setAttribute('style', 'display: none');
 		}
 		try {
 			document.querySelector('.pysssss-image-feed').setAttribute('style', 'display: none');
